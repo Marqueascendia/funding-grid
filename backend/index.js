@@ -29,7 +29,7 @@ connectToDatabase();
 app.get('/api/db', verifyUser, getDbUtils)
 
 // Auth Routes
-app.post("/signup", signup);
+// app.post("/signup", signup);
 app.post("/login", login);
 
 // company data routes
