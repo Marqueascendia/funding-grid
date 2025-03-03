@@ -5,6 +5,9 @@ const MultiSelectDropdown = ({options, formData, name}) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
+    useEffect(() => {
+      setSelectedOptions(formData[name]);
+    }, [formData]);
 
   // Handle selecting an option
   const handleSelect = (option) => {

@@ -83,17 +83,10 @@ const Home = () => {
   }
 
   async function handleAddEntry(setFormData, formData) {
-    console.log('setFormData');
+    console.log('FormData', formData);
     setIsAdding(true);
     try {
-      const payload = {
-        ...formData,
-        investingFields: formData.investingFields
-          .split(",")
-          .map((item) => item.trim()),
-      };
-      console.log('payload', payload);
-      const res = await axios.post(`${baseUrl}/api/single-upload`, payload, {
+      const res = await axios.post(`${baseUrl}/api/single-upload`, formData, {
         validateStatus: (s) => s < 500,
         headers: {
           Authorization: `Bearer ${token}`,
@@ -218,6 +211,7 @@ const Home = () => {
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
           setTotalCount={setTotalCount}
+          existingFilters={existingFilters}
         />
       </div>
     </div>

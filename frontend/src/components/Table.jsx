@@ -15,6 +15,7 @@ const Table = ({
   data,
   setData,
   setTotalCount,
+  existingFilters,
 }) => {
   const [entryOpen, setEntryOpen] = useState(false);
   const [formData, setFormData] = useState({});
@@ -203,6 +204,7 @@ const Table = ({
         handleAction={handleEdit}
         loading={isUpdating}
         title="Edit Data"
+        existingFilters={existingFilters}
       />
 
       <DeleteDialog

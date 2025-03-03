@@ -22,7 +22,7 @@ const countDuplicates = async (req, res) => {
 
     res.status(200).json({ count });
   } catch (error) {
-    console.log("error in count duplicates API", error.message);
+    console.error("error in count duplicates API", error.message);
     res
       .status(500)
       .json({ message: "Error counting duplicates", error: error.message });
@@ -57,7 +57,7 @@ const uploadCompanyData = async (req, res) => {
     await Company.insertMany(uniqueData);
     res.status(200).json({ message: "CSV data uploaded successfully" });
   } catch (error) {
-    console.log("error in upload data APi", error.message);
+    console.error("error in upload data APi", error.message);
     res
       .status(500)
       .json({ message: "Error uploading data", error: error.message });
@@ -117,7 +117,6 @@ const getCompanyData = async (req, res) => {
     
     // Construct the final query
     const filters = orConditions.length > 0 ? { $or: orConditions } : {};
-    console.log('filters', filters);
 
     const skip = (page - 1) * limit;
 
@@ -129,7 +128,7 @@ const getCompanyData = async (req, res) => {
 
     res.status(200).json({ data, totalCount });
   } catch (error) {
-    console.log("error in fetch data API", error.message);
+    console.error("error in fetch data API", error.message);
     res
       .status(500)
       .json({ message: "Error fetching data", error: error.message });
@@ -152,7 +151,7 @@ const getDownloadData = async (req, res) => {
 
     res.status(200).json({ data, totalCount });
   } catch (error) {
-    console.log("error in fetch data API", error.message);
+    console.error("error in fetch data API", error.message);
     res
       .status(500)
       .json({ message: "Error fetching data", error: error.message });
@@ -168,7 +167,7 @@ const deleteCompanyData = async (req, res) => {
     }
     res.status(200).json({ message: "data deleted successfully" });
   } catch (error) {
-    console.log("error in delete data API", error.message);
+    console.error("error in delete data API", error.message);
     res
       .status(500)
       .json({ message: "Error deleting data", error: error.message });
@@ -186,7 +185,7 @@ const updateCompanyData = async (req, res) => {
     }
     res.status(200).json({ message: "data updated successfully", data: updatedData });
   } catch (error) {
-    console.log("error in update data API", error.message);
+    console.error("error in update data API", error.message);
     res
       .status(500)
       .json({ message: "Error updating data", error: error.message });
