@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import {
@@ -15,22 +15,19 @@ export default function EntryDialog({ open, setOpen, existingFilters }) {
   const [loading, setLoading] = useState(false);
   const [batchSize, setBatchSize] = useState(5000);
   const [totalRecords, setTotalRecords] = useState(500);
-  const [filtersIndustry, setFiltersIndustry] = useState([]);
-  const [filtersInvestingFields, setFiltersInvestingFields] = useState([]);
-  const [filteredCountries, setFilteredCountries] = useState([]);
+  const [filters, setFilters] = useState([]);
 
   const downloadCSV = async () => {
     setLoading(true);
     try {
-      const ft = {};  
-      if (filtersIndustry.length > 0) {
-        ft.industry = filtersIndustry;
-      }
-      if (filtersInvestingFields.length > 0) {
-        ft.investingFields = filtersInvestingFields;
+      const ft = {};
+      if (filters.length > 0) {
+        filters.forEach((filter) => {
+          ft[filter.name] = filter.value;
+        });
       }
       const res = await axios.get(`${baseUrl}/data`, {
-        params: { limit: totalRecords, ...ft },
+        params: { limit: totalRecords, ft },
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -95,23 +92,26 @@ export default function EntryDialog({ open, setOpen, existingFilters }) {
     }
   };
 
-  function handleIndustry(item) {
-    if (filtersIndustry.includes(item)) {
-      setFiltersIndustry(filtersIndustry.filter((i) => i !== item));
+  function handleFilter(ft, item, index) {
+    let newValues = filters[index].value || [];
+    if (newValues.includes(item)) {
+      newValues = newValues.filter((i) => i !== item);
     } else {
-      setFiltersIndustry([...filtersIndustry, item]);
+      newValues = [...newValues, item];
     }
+    setFilters((prev) =>
+      prev.map((f) => (f._id === ft._id ? { ...f, value: newValues } : f))
+    );
   }
 
-  function handleInvestingFields(item) {
-    if (filtersInvestingFields.includes(item)) {
-      setFiltersInvestingFields(
-        filtersInvestingFields.filter((i) => i !== item)
-      );
-    } else {
-      setFiltersInvestingFields([...filtersInvestingFields, item]);
+  useEffect(() => {
+    if (existingFilters) {
+      setFilters(existingFilters.map((filter) => ({
+      ...filter,
+      value: []
+    })));
     }
-  }
+  }, [existingFilters]);
 
   return (
     <Dialog open={open} onClose={setOpen} className="relative z-10">
@@ -123,46 +123,37 @@ export default function EntryDialog({ open, setOpen, existingFilters }) {
               Download CSV
             </DialogTitle>
             <div className="bg-white p-6 max-w-2xl flex flex-col gap-6">
-
               {/* filter section  */}
 
-              <div className="flex flex-col gap-2">
-                <div className="font-semibold text-lg">Industry</div>
-                <div className="grid grid-cols-4 gap-4">
-                  {existingFilters?.industry?.map((item, index) => (
-                    <button
-                      key={index}
-                      className={` text-white px-3 py-2 rounded-md cursor-pointer ${
-                        filtersIndustry.includes(item)
-                          ? "bg-zinc-700"
-                          : "bg-zinc-400"
-                      }`}
-                      onClick={() => handleIndustry(item)}
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {existingFilters?.map((ft, i) => (
+                <>
+                  <div key={i} className="flex flex-col gap-4 ">
 
-              <div className="flex flex-col gap-2">
-                <div className="font-semibold text-lg">Investing Fields</div>
-                <div className="grid grid-cols-4 gap-4">
-                  {existingFilters?.investingFields?.map((item, index) => (
-                    <button
-                      key={index}
-                      className={` text-white px-3 py-2 rounded-md cursor-pointer ${
-                        filtersInvestingFields.includes(item)
-                          ? "bg-zinc-700"
-                          : "bg-zinc-400"
-                      }`}
-                      onClick={() => handleInvestingFields(item)}
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                    <div className="font-semibold text-lg">{ft.name}</div>
+
+                    <div className="flex flex-col gap-4">
+                      <div className="grid grid-cols-4 gap-4">
+                        {ft?.value?.map((item, index) => (
+                          <button
+                            key={index}
+                            className={` text-white px-3 py-2 rounded-md cursor-pointer ${
+                              filters?.length > 0
+                                && filters
+                                    ?.find((filter) => filter._id === ft._id)
+                                    .value?.includes(item)
+                                ? "bg-zinc-700"
+                                : "bg-zinc-400"
+                            }`}
+                            onClick={() => handleFilter(ft, item, i)}
+                          >
+                            {item}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ))}
 
               <div>
                 <label className="block text-gray-700 mb-2">

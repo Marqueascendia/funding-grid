@@ -14,6 +14,7 @@ const getFilters = async (req, res) => {
 const updateFilters = async (req, res) => {
   try {
     const { value, _id } = req.body;
+    console.log('req.body', req.body);
 
     if(!_id || !value) {
       return res.status(400).json({ error: "ID and value are required" });
@@ -38,8 +39,7 @@ const updateFilters = async (req, res) => {
 
 const createFilter = async (req, res) => {
   try {
-    const { name, value } = req.body;
-    const filter = await Filters.create({ name, value });
+    const filter = await Filters.create({ ...req.body });
     res.status(200).json({ filter: filter });
   } catch (error) {
     console.error("error in create filter", error.message);

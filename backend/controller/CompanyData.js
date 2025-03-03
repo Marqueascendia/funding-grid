@@ -89,81 +89,35 @@ const getCompanyData = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit);
-    const {
-      country,
-      stage,
-      industry,
-      programTypes,
-      states,
-      stages,
-      searchTerm,
-      investingFields,
-    } = req.query;
+    const { ft, searchTerm } = req.query;
 
     // Create an array for $or conditions
     const orConditions = [];
 
-    // Add conditions to the $or array for each defined filter
-    if (country) {
-      orConditions.push({
-        country: Array.isArray(country) ? { $in: country } : country,
-      });
+    if(ft){
+      Object.keys(ft).forEach(key => {
+        orConditions.push({ [key]: { $in: Array.isArray(ft[key]) ? ft[key] : [ft[key]] } });
+      })
     }
-
-    if (stage) {
-      orConditions.push({
-        stage: Array.isArray(stage) ? { $in: stage } : stage,
-      });
-    }
-
-    if (industry) {
-      orConditions.push({
-        investingFields: { $in: Array.isArray(industry) ? industry : [industry] },
-      });
-    }
-
-    if (investingFields) {
-      orConditions.push({
-        investingFields: { $in: Array.isArray(investingFields) ? investingFields : [investingFields] },
-      });
-    }
-
-    if (programTypes) {
-      orConditions.push({
-        programTypes: Array.isArray(programTypes)
-          ? { $in: programTypes }
-          : programTypes,
-      });
-    }
-
-    if (states) {
-      orConditions.push({
-        states: Array.isArray(states) ? { $in: states } : states,
-      });
-    }
-
-    if (stages) {
-      orConditions.push({
-        stages: Array.isArray(stages) ? { $in: stages } : stages,
-      });
-    }
-
 
     if (searchTerm) {
       const regex = new RegExp(searchTerm, "i"); // Case-insensitive regex
-
-      orConditions.push({ companyName: regex });
-      orConditions.push({ firstName: regex });
-      orConditions.push({ lastName: regex });
-      orConditions.push({ email: regex });
-      orConditions.push({ title: regex });
-      orConditions.push({ website: regex });
-      orConditions.push({ industry: { $in: [regex] } });
-      orConditions.push({ investingFields: { $in: [regex] } });
+    
+      Object.keys(Company.schema.paths).forEach(key => {
+        if (key === "_id") return
+        const schemaType = Company.schema.paths[key].instance;
+        
+        if (schemaType === "String") {
+          orConditions.push({ [key]: { $regex: regex} });
+        } else if (schemaType === "Array") {
+          orConditions.push({ [key]: { $elemMatch: { $regex: regex } } })
+        }
+      });
     }
-
+    
     // Construct the final query
     const filters = orConditions.length > 0 ? { $or: orConditions } : {};
+    console.log('filters', filters);
 
     const skip = (page - 1) * limit;
 
