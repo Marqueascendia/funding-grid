@@ -31,24 +31,17 @@ const Home = () => {
     500
   );
 
-  async function fetchPage({ page, searchTerm, industry, investingFields }) {
+  async function fetchPage({ page, filters, searchTerm }) {
     const ft = {};
-    if (searchTerm) {
-      ft.searchTerm = searchTerm;
-    }
-    if (industry) {
-      ft.industry = industry;
-    }
-    if (investingFields) {
-      ft.investingFields = investingFields;
-    }
+    filters.map(filter => { filter.value.length > 0 && (ft[filter.name] = filter.value) });
     try {
       setLoading(true);
       const response = await axios.get(`${baseUrl}/data`, {
         params: {
           page,
           limit,
-          ...ft,
+          ft,
+          searchTerm,
         },
         headers: {
           Authorization: `Bearer ${token}`,
@@ -77,6 +70,10 @@ const Home = () => {
       });
       if (response.status === 200) {
         setExistingFilters(response.data.filters);
+        setFilters(response.data.filters.map((filter) => ({
+          ...filter,
+          value: []
+        })));
       } else {
         toast.error(response.data.error || "Error fetching data");
       }
@@ -134,7 +131,7 @@ const Home = () => {
   }, [debouncedSearchTerm]);
 
   function handleFilter() {
-    fetchPage({ page: currentPage, searchTerm: searchTerm, ...filters });
+    fetchPage({ page: currentPage, searchTerm: searchTerm, filters });
   }
 
   useEffect(() => {

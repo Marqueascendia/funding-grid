@@ -24,51 +24,30 @@ export default function FiltersDialog({
   const [loading, setLoading] = useState(false);
   const [loadingType, setLoadingType] = useState("");
 
-  function handleFilter(item) {
-    if (filters.find((filter) => filter._id === item._id)) {
-      setFilters((prev) =>
-        prev?.map((filter) =>
-          filter._id === item._id
-            ? {
-                ...filter,
-                value: filter.value.includes(item)
-                  ? filter.value.filter((i) => i !== item)
-                  : [...filter.value, item],
-              }
-            : filter
-        )
-      );
+  function handleFilter(ft, item, index) {
+    let newValues = filters[index].value || [];
+    if (newValues.includes(item)) {
+      newValues = newValues.filter((i) => i !== item);
     } else {
-      setFilters((prev) => [
-        ...prev,
-        {
-          name: item.name,
-          value: [],
-          _id: item._id,
-        },
-      ]);
+      newValues = [...newValues, item];
     }
+    setFilters((prev) =>
+      prev.map((f) => (f._id === ft._id ? { ...f, value: newValues } : f))
+    );
   }
 
   function handleReset() {
-    setFilters({
-      industry: [],
-      stages: "",
-      country: "",
-      programTypes: "",
-    });
-    setFiltersIndustry([]);
-    setFiltersInvestingFields([]);
+    setFilters((prev) => prev.map((filter) => ({ ...filter, value: [] })));
   }
 
-  async function handleAddFilter({ type, item }) {
+  async function handleAddFilter({ ft, item }) {
     setLoading(true);
     try {
       const response = await axios.post(
         `${baseUrl}/update-filter`,
         {
-          [type]: item,
-          _id: existingFilters._id,
+          value: item,
+          _id: ft._id,
         },
         {
           headers: {
@@ -80,10 +59,32 @@ export default function FiltersDialog({
         }
       );
       if (response.status === 200) {
-        setExistingFilters?.((prev) => ({
-          ...prev,
-          [type]: [...prev[type], item],
-        }));
+        setExistingFilters?.((prev) =>
+          prev.map((f) =>
+            f._id === ft._id ? { ...f, value: [...f.value, item] } : f
+          )
+        );
+        toast.success("Filter added successfully");
+      } else {
+        toast.error(response.data.error || "Error adding filter");
+      }
+    } catch (error) {
+      toast.error("Error adding filter");
+    } finally {
+      setLoading(false);
+      setLoadingType("");
+    }
+  }
+
+  async function handleAddNewFilter({ item }) {
+    setLoading(true);
+    setLoadingType("newFilter");
+    try {
+      const response = await axios.post(`${baseUrl}/create-filter`, {
+        name: item,
+      });
+      if (response.status === 200) {
+        setExistingFilters?.((prev) => [...prev, response.data.filter]);
         toast.success("Filter added successfully");
       } else {
         toast.error(response.data.error || "Error adding filter");
@@ -97,8 +98,8 @@ export default function FiltersDialog({
   }
 
   useEffect(() => {
-    console.log(existingFilters);
-  }, [existingFilters]);
+    console.log('existingFilters', existingFilters);
+  }, [existingFilters, filters]);
 
   return (
     <Dialog open={open} onClose={setOpen} className="relative z-10">
@@ -114,7 +115,28 @@ export default function FiltersDialog({
             className="relative transform overflow-hidden p-8 rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-5xl data-closed:sm:translate-y-0 data-closed:sm:scale-95"
           >
             <DialogTitle className="flex justify-between gap-5 mb-5">
-              <div className="font-bold text-2xl">Filters</div>
+              <div className=" flex gap-2">
+                <div className="font-bold text-2xl">Filters</div>
+                <div className="flex border text-black border-zinc-600 rounded-md gap-2">
+                  <input
+                    {...register('newFilter')}
+                    placeholder="Add name of new filter"
+                    type="text"
+                    className="px-2 py-[6px] focus:outline-none"
+                  />
+                  <button
+                    disabled={loading && loadingType === 'newFilter'}
+                    onClick={() =>
+                      handleAddNewFilter({
+                        item: getValues('newFilter'),
+                      })
+                    }
+                    className="bg-zinc-800 rounded-md py-[6px] px-4 text-white cursor-pointer"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
               <div className="flex gap-6">
                 <button
                   className="bg-zinc-800 rounded-lg p-2 px-4 text-white cursor-pointer"
@@ -132,9 +154,9 @@ export default function FiltersDialog({
             </DialogTitle>
 
             <div className="flex flex-col gap-8">
-              {existingFilters.map((ft, index) => (
+              {existingFilters.map((ft, i) => (
                 <>
-                  <div className="flex flex-col gap-4 ">
+                  <div key={i} className="flex flex-col gap-4 ">
                     <div className="flex gap-6 items-center">
                       <div className="font-semibold text-lg">{ft.name}</div>
                       <div className="flex border text-black border-zinc-600 rounded-md gap-2">
@@ -148,7 +170,7 @@ export default function FiltersDialog({
                           disabled={loading && loadingType === ft.name}
                           onClick={() =>
                             handleAddFilter({
-                              type: ft.name,
+                              ft,
                               setLoadingType: ft.name,
                               item: getValues(ft.name),
                             })
@@ -166,12 +188,13 @@ export default function FiltersDialog({
                           <button
                             key={index}
                             className={` text-white px-3 py-2 rounded-md cursor-pointer ${
-                              filters?.find((filter) => filter._id === ft._id)
-                                ?.value?.includes(item)
+                              filters
+                                ?.find((filter) => filter._id === ft._id)
+                                .value?.includes(item)
                                 ? "bg-zinc-700"
                                 : "bg-zinc-400"
                             }`}
-                            onClick={() => handleFilter(item)}
+                            onClick={() => handleFilter(ft, item, i)}
                           >
                             {item}
                           </button>
@@ -181,93 +204,6 @@ export default function FiltersDialog({
                   </div>
                 </>
               ))}
-
-              {/* <div className="flex flex-col gap-4">
-              <div className="flex gap-6 items-center">
-                  <div className="font-semibold text-lg">Investing Fields</div>
-                  <div className="flex border text-black border-zinc-600 rounded-md gap-2">
-                    <input
-                      {...register("investingFields")}
-                      placeholder="Add new investing field"
-                      type="text"
-                      className="px-2 py-[6px] focus:outline-none"
-                    />
-                    <button
-                      disabled={loading && loadingType === "investingFields"}
-                      onClick={() =>
-                        handleAddFilter({
-                          type: "investingFields",
-                          setLoadingType: "investingFields",
-                          item: getValues("investingFields"),
-                        })
-                      }
-                      className="bg-zinc-800 rounded-md py-[6px] px-4 text-white cursor-pointer"
-                    >
-                      Add
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-4">
-                  <div className="grid grid-cols-4 gap-4">
-                    {existingFilters?.investingFields?.map((item, index) => (
-                      <button
-                        key={index}
-                        className={` text-white px-3 py-2 rounded-md cursor-pointer ${
-                          filtersInvestingFields.includes(item)
-                            ? "bg-zinc-700"
-                            : "bg-zinc-400"
-                        }`}
-                        onClick={() => handleInvestingFields(item)}
-                      >
-                        {item}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div> */}
-
-              {/* <div className="flex flex-col gap-4">
-                <div className="flex gap-6 items-center">
-                  <div className="font-semibold text-lg">Industry</div>
-                  <div className="flex border text-black border-zinc-600 rounded-md gap-2">
-                    <input
-                      {...register("industry")}
-                      placeholder="Add new industry"
-                      type="text"
-                      className="px-2 py-[6px] focus:outline-none"
-                    />
-                    <button
-                      disabled={loading && loadingType === "industry"}
-                      onClick={() =>
-                        handleAddFilter({
-                          type: "industry",
-                          setLoadingType: "industry",
-                          item: getValues("industry"),
-                        })
-                      }
-                      className="bg-zinc-800 rounded-md py-[6px] px-4 text-white cursor-pointer"
-                    >
-                      Add
-                    </button>
-                  </div>
-                </div>
-                <div className="grid grid-cols-4 gap-4">
-                  {existingFilters?.industry?.map((item, index) => (
-                    <button
-                      key={index}
-                      className={` text-white px-3 py-2 rounded-md cursor-pointer ${
-                        filtersIndustry.includes(item)
-                          ? "bg-zinc-700"
-                          : "bg-zinc-400"
-                      }`}
-                      onClick={() => handleIndustry(item)}
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </div>
-              </div> */}
             </div>
 
             <div className="w-full grid grid-cols-2 gap-6 mt-8">
