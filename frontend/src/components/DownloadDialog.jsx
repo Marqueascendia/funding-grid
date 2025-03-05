@@ -53,6 +53,16 @@ export default function EntryDialog({ open, setOpen, existingFilters }) {
         "Email",
         "LinkedIn",
         "Date",
+        "Country",
+        "Investor Name",
+        "Investor Type",
+        "Investment Stage",
+        "Investment Size",
+        "Industry Focus",
+        "Geographic Focus",
+        "Investment Criteria",
+        "Exit Strategy",
+        "Industry Subcategory",
       ];
 
       for (let i = 0; i < data.length; i += batchSize) {
@@ -69,6 +79,16 @@ export default function EntryDialog({ open, setOpen, existingFilters }) {
             row.email,
             row.linkedIn,
             row.date,
+            row.country,
+            row.investorName,
+            row.investorType,
+            row.investmentStage,
+            row.investmentSize,
+            row.industryFocus,
+            row.geographicFocus,
+            row.investmentCriteria,
+            row.exitStrategy,
+            row.industrySubcategory,
           ]
             .map((value) => `"${value}"`)
             .join(",")

@@ -1,20 +1,35 @@
 const convertToCamelCase = (data) => {
+  const getString = (key) => data[key] || data[key.toLowerCase()] || "";
+  const getArray = (key) =>
+    data[key] || data[key.toLowerCase()]
+      ? data[key].split(",").map((field) => field.trim())
+      : [];
+
   return {
-    companyName: data["Company Name"] || "",
-    website: data.Website || "",
-    formSubmission: data["Form submission"] || "",
-    industry: data.Industry ? data.Industry.split(",").map((field) => field.trim()) : [],
-    investingFields: data["Investing Fields"]
-      ? data["Investing Fields"].split(",").map((field) => field.trim())
-      : [],
-    firstName: data["First Name"] || "",
-    lastName: data["Last Name"] || "",
-    title: data.Title || "",
-    email: data.Email || "",
-    linkedIn: data.LinkedIn || "",
-    date: data.Date || "",
+    companyName: getString("Company Name"),
+    website: getString("Website"),
+    formSubmission: getString("Form submission"),
+    industry: getArray("Industry"),
+    investingFields: getArray("Investing Fields"),
+    firstName: getString("First Name"),
+    lastName: getString("Last Name"),
+    title: getString("Title"),
+    email: getString("Email"),
+    linkedIn: getString("LinkedIn"),
+    date: getString("Date"),
+    country: getArray("Country"),
+    investorName: getString("Investor Name"),
+    investorType: getArray("Investor Type"),
+    investmentStage: getArray("Investment Stage"),
+    investmentSize: getArray("Investment Size"),
+    industryFocus: getArray("Industry Focus"),
+    geographicFocus: getArray("Geographic Focus"),
+    investmentCriteria: getArray("Investment Criteria"),
+    exitStrategy: getArray("Exit Strategy"),
+    industrySubcategory: getArray("Industry Subcategory"),
   };
 };
+
 
 const normalizeWebsite = (url) => {
   // Remove http/https and www prefixes
@@ -22,11 +37,11 @@ const normalizeWebsite = (url) => {
     .replace(/(https?:\/\/)?(www\.)?/g, "")
     .toLowerCase()
     .trim();
-  
+
   normalized = normalized.replace(/\/+$/, "");
 
-  const parts = normalized.split('.');
-  
+  const parts = normalized.split(".");
+
   if (parts.length >= 2) {
     const mainDomain = parts[parts.length - 2];
     return mainDomain;

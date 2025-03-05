@@ -7,7 +7,7 @@ import {
 } from "@headlessui/react";
 import { Loader } from "lucide-react";
 
-export default function AlertDialog({ open, setOpen, count, setUpload, loading }) {
+export default function AlertDialog({ open, setOpen, count, setUpload, loading, setCsvData }) {
 
   useEffect(() => {}, [count]);
 
@@ -44,7 +44,10 @@ export default function AlertDialog({ open, setOpen, count, setUpload, loading }
             <div className="bg-gray-50 px-4 py-3 sm:flex justify-end gap-4 sm:px-6">
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                  setCsvData(null);
+                }}
                 className="inline-flex justify-center w-[90px] rounded-md border border-red-600 px-3 py-2 text-sm font-semibold text-red-600 shadow-xs hover:text-red-500 sm:ml-3 sm:w-auto"
               >
                 cancel

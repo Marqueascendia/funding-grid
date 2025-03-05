@@ -5,6 +5,7 @@ import EntryDialog from "./EntryDialog";
 import axios from "axios";
 import toast from "react-hot-toast";
 import DeleteDialog from "./DeleteDialog";
+import DeleteMultipleDialog from "./DelteMultipleDialog";
 
 const Table = ({
   fetchPage,
@@ -17,15 +18,19 @@ const Table = ({
   setTotalCount,
   existingFilters,
   handlePageBtn,
+  limit,
 }) => {
   const [entryOpen, setEntryOpen] = useState(false);
   const [formData, setFormData] = useState({});
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [selectedRows, setSelectedRows] = useState({});
   const baseUrl = import.meta.env.VITE_BACKEND_URL;
   const token = localStorage.getItem("fundingGridToken");
   const [space, setSpace] = useState(0);
+  const [deleteMultipleOpen, setDeleteMultipleOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   async function handleEdit(setUpdateData, updateData, id) {
     try {
@@ -73,7 +78,6 @@ const Table = ({
   }, [currentPage]);
 
   useEffect(() => {
-    console.log(data);
     const updateSpace = () => {
       const website = document.getElementById("website");
       if (website) {
@@ -81,13 +85,71 @@ const Table = ({
       }
     };
 
-    // Run after component renders
     setTimeout(updateSpace, 0);
 
-    // Optional: Update on window resize
     window.addEventListener("resize", updateSpace);
     return () => window.removeEventListener("resize", updateSpace);
   }, [data]);
+
+  // Handle checkbox selection
+  const handleSelectRow = (id) => {
+    setSelectedRows((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  // Select all rows
+  const handleSelectAll = () => {
+    if (Object.keys(selectedRows).length === data.length) {
+      setSelectedRows({});
+    } else {
+      const newSelection = {};
+      data.forEach((row) => {
+        newSelection[row._id] = true;
+      });
+      setSelectedRows(newSelection);
+    }
+  };
+
+  // Delete selected rows
+  const handleDeleteSelected = async () => {
+    setIsDeleting(true);
+    const idsToDelete = Object.keys(selectedRows).filter(
+      (id) => selectedRows[id]
+    );
+    if (idsToDelete.length === 0) {
+      toast.error("No rows selected");
+      return;
+    }
+
+    try {
+      await axios.post(
+        `${baseUrl}/delete-multiple`,
+        { ids: idsToDelete },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setData((prevData) =>
+        prevData.filter((row) => !idsToDelete.includes(row._id))
+      );
+      setTotalCount((prevCount) => prevCount - idsToDelete.length);
+      if (idsToDelete.length === data.length) {
+        setCurrentPage(1);
+        handlePageBtn(1);
+      }
+      toast.success("Selected rows deleted successfully");
+      setSelectedRows({});
+    } catch (error) {
+      toast.error("Error deleting selected rows");
+    } finally {
+      setIsDeleting(false);
+      setDeleteMultipleOpen(false);
+    }
+  };
 
   return (
     <>
@@ -96,15 +158,24 @@ const Table = ({
           <Loader className="animate-spin" />
         </div>
       ) : data.length > 0 ? (
-        <div className="w-full justify-between items-center flex flex-col gap-6 mb-12">
+        <div className="w-full justify-between flex flex-col gap-6 mb-12">
+          <button
+            onClick={() => setDeleteMultipleOpen(true)}
+            className="mb-2 px-4 py-2 bg-red-500 text-white rounded-md w-fit"
+          >
+            Delete Selected
+          </button>
           <div className="content-wrapper overflow-x-scroll w-[100%]">
             <table className="w-[200%]">
               <thead className="flex border-t border-gray-300">
-                <div className="sticky left-0 bg-white w-[50px] ps-2 border border-gray-300 border-t-0 flex items-center">
+                <div className="sticky left-0 bg-white w-[50px] border border-gray-300 border-t-0 flex items-center justify-center">
+                  <input type="checkbox" onChange={handleSelectAll} />
+                </div>
+                <div className="sticky left-[50px] bg-white w-[50px] ps-2 border border-gray-300 border-t-0 flex items-center">
                   S.No
                 </div>
-                <tr className="grid grid-cols-12 text-left w-[calc(100%-50px)]">
-                  <th className="sticky left-[50px] bg-white row">
+                <tr className="grid grid-cols-12 text-left w-[calc(100%-100px)]">
+                  <th className="sticky left-[100px] bg-white row">
                     Company Name
                   </th>
                   <th
@@ -112,7 +183,7 @@ const Table = ({
                     id="website"
                     className="sticky bg-white row"
                   >
-                    website
+                    Website
                   </th>
                   <th className="row">Form Submission</th>
                   <th className="row">Industry</th>
@@ -129,19 +200,23 @@ const Table = ({
               <tbody className="text-left border-gray-300">
                 {data.map((row, index) => (
                   <div key={index} className="flex w-full">
-                    <div className="sticky left-0 ps-2 bg-white w-[50px] border border-gray-300 border-t-0 flex items-center">
-                      {index + 1}
+                    <div className="sticky left-0 bg-white w-[50px] border border-gray-300 border-t-0 flex items-center justify-center">
+                      <input
+                        type="checkbox"
+                        checked={!!selectedRows[row._id]}
+                        onChange={() => handleSelectRow(row._id)}
+                      />
                     </div>
-                    <tr
-                      key={index}
-                      className=" grid grid-cols-12 items-center w-[calc(100%-50px)]"
-                    >
-                      <td className="row sticky left-[50px] bg-white ">
+                    <div className="sticky left-[50px] ps-2 bg-white w-[50px] border border-gray-300 border-t-0 flex items-center">
+                      {(currentPage - 1) * limit + index + 1}
+                    </div>
+                    <tr className="grid grid-cols-12 items-center w-[calc(100%-100px)]">
+                      <td className="row sticky left-[100px] bg-white">
                         {row.companyName}
                       </td>
                       <td
                         style={{ left: `${space - 68}px` }}
-                        className="row sticky bg-white "
+                        className="row sticky bg-white"
                       >
                         {row.website}
                       </td>
@@ -155,38 +230,24 @@ const Table = ({
                       >
                         {row.formSubmission ? row.formSubmission : "N/A"}
                       </td>
-                      <td className="row">
-                        {row?.industry.map((item, index) => (
-                          <div key={index}>
-                            {item}
-                            {index < row?.industry.length - 1 && ", "}
-                          </div>
-                        ))}
-                      </td>
-                      <td className="row">
-                        {row.investingFields.map((item, index) => (
-                          <div key={index}>
-                            {item}
-                            {index < row?.investingFields.length - 1 && ", "}
-                          </div>
-                        ))}
-                      </td>
+                      <td className="row">{row.industry.join(", ")}</td>
+                      <td className="row">{row.investingFields.join(", ")}</td>
                       <td className="row flex gap-4">
                         <button
                           onClick={() => {
                             setFormData(row);
                             setEntryOpen(true);
                           }}
-                          className="bg-yellow-500 text-white px-4 py-2 rounded-md cursor-pointer"
+                          className="bg-yellow-500 text-white px-4 py-2 rounded-md"
                         >
                           <PencilIcon className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => {
-                            setDeleteOpen(true);
                             setDeleteId(row._id);
+                            setDeleteOpen(true);
                           }}
-                          className="bg-red-500 text-white px-4 py-2 rounded-md cursor-pointer"
+                          className="bg-red-500 text-white px-4 py-2 rounded-md"
                         >
                           <TrashIcon className="w-4 h-4" />
                         </button>
@@ -235,6 +296,13 @@ const Table = ({
         id={deleteId}
         setData={setData}
         setTotalCount={setTotalCount}
+      />
+
+      <DeleteMultipleDialog
+        open={deleteMultipleOpen}
+        setOpen={setDeleteMultipleOpen}
+        loading={isDeleting}
+        handleDelete={handleDeleteSelected}
       />
     </>
   );

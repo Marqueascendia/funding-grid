@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import EntryDialog from "../components/EntryDialog";
 import DownloadDialog from "../components/DownloadDialog";
 import StorageStats from "../components/StorageStats";
+import { uploadFormatDownload } from "@/utilities/helpers";
 
 const Home = () => {
   const [open, setOpen] = useState(false);
@@ -33,7 +34,9 @@ const Home = () => {
 
   async function fetchPage({ page, filters, searchTerm }) {
     const ft = {};
-    filters.map(filter => { filter.value.length > 0 && (ft[filter.name] = filter.value) });
+    filters.map((filter) => {
+      filter.value.length > 0 && (ft[filter.name] = filter.value);
+    });
     try {
       setLoading(true);
       const response = await axios.get(`${baseUrl}/data`, {
@@ -59,7 +62,7 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   async function fetchFilters() {
     try {
@@ -70,10 +73,12 @@ const Home = () => {
       });
       if (response.status === 200) {
         setExistingFilters(response.data.filters);
-        setFilters(response.data.filters.map((filter) => ({
-          ...filter,
-          value: []
-        })));
+        setFilters(
+          response.data.filters.map((filter) => ({
+            ...filter,
+            value: [],
+          }))
+        );
       } else {
         toast.error(response.data.error || "Error fetching data");
       }
@@ -91,7 +96,7 @@ const Home = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log('res', res);
+      console.log("res", res);
       if (res.status !== 200) {
         toast.error(res.data.error || "error adding data.");
         return;
@@ -116,7 +121,7 @@ const Home = () => {
     } finally {
       setIsAdding(false);
     }
-  };
+  }
 
   useEffect(() => {
     fetchPage({ page: currentPage, searchTerm: debouncedSearchTerm, filters });
@@ -146,8 +151,13 @@ const Home = () => {
         FUNDING GRID
       </h1>
       <div className="flex justify-between items-center w-full pe-5">
-      <StorageStats />
-        <CsvUploader />
+        <StorageStats />
+        <div className="flex gap-4">
+          <button onClick={()=>uploadFormatDownload()} className="border border-zinc-800 text-zinc-800 py-2 rounded-md px-8 cursor-pointer">
+            CSV format
+          </button>
+          <CsvUploader />
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-12 justify-between items-center w-full px-5">
         <div className="flex items-center gap-2 w-full bg-gray-100 rounded-lg p-2">
@@ -217,6 +227,7 @@ const Home = () => {
           setTotalCount={setTotalCount}
           existingFilters={existingFilters}
           handlePageBtn={handlePageBtn}
+          limit={limit}
         />
       </div>
     </div>

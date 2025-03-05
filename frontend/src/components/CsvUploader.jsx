@@ -27,6 +27,7 @@ const CsvUploader = ({}) => {
 
   async function handleCountDuplicates() {
     try {
+      console.log('csvData', csvData);
       setLoading(true);
       const response = await axios.post(`${baseUrl}/count-duplicates`, {
         data: csvData,
@@ -36,6 +37,8 @@ const CsvUploader = ({}) => {
         }
       });
       if (response.status === 200) {
+        const { status, message } = response.data;
+        console.log(status, message);
         setDuplicatesCount(response.data.count);
         setAlertOpen(true);
       } else {
@@ -86,7 +89,7 @@ const CsvUploader = ({}) => {
           className="border-2 border-gray-300 rounded-md p-2"
           type="file"
           accept=".csv"
-        onChange={handleFileUpload}
+          onChange={handleFileUpload}
       />
       <button
         disabled={loading}
@@ -98,7 +101,7 @@ const CsvUploader = ({}) => {
       </div>
 
       {/* dialogs  */}
-      <AlertDialog open={alertOpen} setOpen={setAlertOpen} count={duplicatesCount} setUpload={setUpload} />
+      <AlertDialog open={alertOpen} setOpen={setAlertOpen} count={duplicatesCount} setUpload={setUpload} setCsvData={setCsvData} />
     </>
   );
 };

@@ -4,7 +4,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const Company = require("./models/Data");
 const dotenv = require("dotenv");
-const { uploadCompanyData, getCompanyData, uploadSingle, getDownloadData, deleteCompanyData, updateCompanyData, countDuplicates } = require("./controller/CompanyData");
+const { uploadCompanyData, getCompanyData, uploadSingle, getDownloadData, deleteCompanyData, updateCompanyData, countDuplicates, deleteMultiple } = require("./controller/CompanyData");
 const { signup, login } = require("./controller/auth");
 const { verifyUser } = require("./utilities/middleware");
 const { getFilters, updateFilters, createFilter } = require("./controller/filters");
@@ -38,6 +38,7 @@ app.post("/upload-csv",verifyUser, uploadCompanyData);
 app.post("/api/single-upload", verifyUser, uploadSingle);
 app.delete("/delete-entry/:id", verifyUser, deleteCompanyData);
 app.put("/update-entry/:id", verifyUser, updateCompanyData);
+app.post("/delete-multiple", verifyUser, deleteMultiple);
 
 // Fetch existing data
 app.get("/data", verifyUser, getCompanyData);
