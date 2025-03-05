@@ -8,7 +8,7 @@ function Pagination({
   handlePageBtn
 }) {
   const maxVisiblePages = 5;
-  const [displayCount, setDisplayCount] = useState(3);
+  const [displayCount, setDisplayCount] = useState(20);
   const [totalPages, setTotalPages] = useState(0);
   const [startPage, setStartPage] = useState(1);
 

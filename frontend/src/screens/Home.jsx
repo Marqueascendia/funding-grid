@@ -18,7 +18,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
-  const limit = 3;
+  const limit = 20;
   const [currentPage, setCurrentPage] = useState(1);
   const token = localStorage.getItem("fundingGridToken");
   const baseUrl = import.meta.env.VITE_BACKEND_URL;
