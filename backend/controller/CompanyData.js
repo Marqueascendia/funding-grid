@@ -1,7 +1,6 @@
 const Company = require("../models/Data");
 const { convertToCamelCase, normalizeWebsite } = require("../utilities/helper");
 
-
 const countDuplicates = async (req, res) => {
   try {
     const { data } = req.body;
@@ -16,7 +15,9 @@ const countDuplicates = async (req, res) => {
       (await Company.find()).map((item) => normalizeWebsite(item.website))
     );
 
-    const duplicates = formattedData.filter((item) => existingWebsites.has(normalizeWebsite(item.website)));
+    const duplicates = formattedData.filter((item) =>
+      existingWebsites.has(normalizeWebsite(item.website))
+    );
 
     const count = duplicates.length;
 
@@ -27,7 +28,7 @@ const countDuplicates = async (req, res) => {
       .status(500)
       .json({ message: "Error counting duplicates", error: error.message });
   }
-}
+};
 
 const uploadCompanyData = async (req, res) => {
   try {
@@ -48,7 +49,6 @@ const uploadCompanyData = async (req, res) => {
       const normalizedWebsite = normalizeWebsite(item.website);
       if (!existingWebsites.has(normalizedWebsite)) {
         existingWebsites.add(normalizedWebsite);
-        // item.website = normalizedWebsite; // Store normalized website
         return true;
       }
       return false;
@@ -64,26 +64,27 @@ const uploadCompanyData = async (req, res) => {
   }
 };
 
-
 const uploadSingle = async (req, res) => {
   try {
-    const data = req.body
+    const data = req.body;
 
     const existingWebsites = new Set(
       (await Company.find()).map((item) => normalizeWebsite(item.website))
     );
 
-    if(existingWebsites.has(normalizeWebsite(data.website))){
-      return res.status(401).json({error : 'already present in database'})
+    if (existingWebsites.has(normalizeWebsite(data.website))) {
+      return res.status(401).json({ error: "already present in database" });
     }
 
     const company = new Company(data);
     await company.save();
-    res.status(200).json({ error : "Company added successfully!" });
+    res.status(200).json({ error: "Company added successfully!" });
   } catch (error) {
-    res.status(500).json({ error : "Error adding company", message: error.message });
+    res
+      .status(500)
+      .json({ error: "Error adding company", message: error.message });
   }
-}
+};
 
 const getCompanyData = async (req, res) => {
   try {
@@ -94,27 +95,29 @@ const getCompanyData = async (req, res) => {
     // Create an array for $or conditions
     const orConditions = [];
 
-    if(ft){
-      Object.keys(ft).forEach(key => {
-        orConditions.push({ [key]: { $in: Array.isArray(ft[key]) ? ft[key] : [ft[key]] } });
-      })
+    if (ft) {
+      Object.keys(ft).forEach((key) => {
+        orConditions.push({
+          [key]: { $in: Array.isArray(ft[key]) ? ft[key] : [ft[key]] },
+        });
+      });
     }
 
     if (searchTerm) {
       const regex = new RegExp(searchTerm, "i"); // Case-insensitive regex
-    
-      Object.keys(Company.schema.paths).forEach(key => {
-        if (key === "_id") return
+
+      Object.keys(Company.schema.paths).forEach((key) => {
+        if (key === "_id") return;
         const schemaType = Company.schema.paths[key].instance;
-        
+
         if (schemaType === "String") {
-          orConditions.push({ [key]: { $regex: regex} });
+          orConditions.push({ [key]: { $regex: regex } });
         } else if (schemaType === "Array") {
-          orConditions.push({ [key]: { $elemMatch: { $regex: regex } } })
+          orConditions.push({ [key]: { $elemMatch: { $regex: regex } } });
         }
       });
     }
-    
+
     // Construct the final query
     const filters = orConditions.length > 0 ? { $or: orConditions } : {};
 
@@ -124,7 +127,7 @@ const getCompanyData = async (req, res) => {
     const data = await Company.find(filters)
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 , _id: 1});
+      .sort({ createdAt: -1, _id: 1 });
 
     res.status(200).json({ data, totalCount });
   } catch (error) {
@@ -135,19 +138,16 @@ const getCompanyData = async (req, res) => {
   }
 };
 
-
 const getDownloadData = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit);
 
     if (isNaN(limit) || limit <= 0) {
-      limit = undefined; 
+      limit = undefined;
     }
 
     const totalCount = await Company.countDocuments();
-    const data = await Company.find()
-      .limit(limit)
-      .sort({ createdAt: -1 });
+    const data = await Company.find().limit(limit).sort({ createdAt: -1 });
 
     res.status(200).json({ data, totalCount });
   } catch (error) {
@@ -162,8 +162,8 @@ const deleteCompanyData = async (req, res) => {
   try {
     const { id } = req.params;
     const deletedData = await Company.findByIdAndDelete(id);
-    if(!deletedData){
-      return res.status(404).json({ error : "data not found" });
+    if (!deletedData) {
+      return res.status(404).json({ error: "data not found" });
     }
     res.status(200).json({ message: "data deleted successfully" });
   } catch (error) {
@@ -172,25 +172,50 @@ const deleteCompanyData = async (req, res) => {
       .status(500)
       .json({ message: "Error deleting data", error: error.message });
   }
-}
+};
 
 const updateCompanyData = async (req, res) => {
   try {
     const { id } = req.params;
     const { data } = req.body;
 
-    const updatedData = await Company.findByIdAndUpdate(id, data, { new: true });
-    if(!updatedData){
-      return res.status(404).json({ error : "data not found" });
+    const updatedData = await Company.findByIdAndUpdate(id, data, {
+      new: true,
+    });
+    if (!updatedData) {
+      return res.status(404).json({ error: "data not found" });
     }
-    res.status(200).json({ message: "data updated successfully", data: updatedData });
+    res
+      .status(200)
+      .json({ message: "data updated successfully", data: updatedData });
   } catch (error) {
     console.error("error in update data API", error.message);
     res
       .status(500)
       .json({ message: "Error updating data", error: error.message });
   }
-}
+};
 
+const deleteMultiple = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    await Company.deleteMany({ _id: { $in: ids } });
+    res.status(200).json({ message: "Data deleted successfully" });
+  } catch (error) {
+    console.error("error in delete multiple API", error.message);
+    res
+      .status(500)
+      .json({ message: "Error deleting data", error: error.message });
+  }
+};
 
-module.exports = { uploadCompanyData, getCompanyData, uploadSingle, getDownloadData, deleteCompanyData, updateCompanyData, countDuplicates };
+module.exports = {
+  uploadCompanyData,
+  getCompanyData,
+  uploadSingle,
+  getDownloadData,
+  deleteCompanyData,
+  updateCompanyData,
+  countDuplicates,
+  deleteMultiple,
+};

@@ -18,11 +18,14 @@ export default function FiltersDialog({
   filters,
   setExistingFilters,
 }) {
-  const { register, getValues } = useForm();
+  const { register, getValues, watch } = useForm();
   const baseUrl = import.meta.env.VITE_BACKEND_URL;
   const token = localStorage.getItem("fundingGridToken");
   const [loading, setLoading] = useState(false);
   const [loadingType, setLoadingType] = useState("");
+
+  // Watch the new filter input
+  const newFilterValue = watch('newFilter');
 
   function handleFilter(ft, item, index) {
     let newValues = filters[index].value || [];
@@ -41,7 +44,11 @@ export default function FiltersDialog({
   }
 
   async function handleAddFilter({ ft, item }) {
+    // Prevent adding empty or already existing values
+    if (!item || ft.value.includes(item)) return;
+
     setLoading(true);
+    setLoadingType(ft.name);
     try {
       const response = await axios.post(
         `${baseUrl}/update-filter`,
@@ -77,6 +84,9 @@ export default function FiltersDialog({
   }
 
   async function handleAddNewFilter({ item }) {
+    // Prevent adding empty filter
+    if (!item) return;
+
     setLoading(true);
     setLoadingType("newFilter");
     try {
@@ -96,10 +106,6 @@ export default function FiltersDialog({
       setLoadingType("");
     }
   }
-
-  useEffect(() => {
-    console.log('existingFilters', existingFilters);
-  }, [existingFilters, filters]);
 
   return (
     <Dialog open={open} onClose={setOpen} className="relative z-10">
@@ -125,15 +131,18 @@ export default function FiltersDialog({
                     className="px-2 py-[6px] focus:outline-none"
                   />
                   <button
-                    disabled={loading && loadingType === 'newFilter'}
+                    disabled={loading || !newFilterValue}
                     onClick={() =>
                       handleAddNewFilter({
                         item: getValues('newFilter'),
                       })
                     }
-                    className="bg-zinc-800 rounded-md py-[6px] px-4 text-white cursor-pointer"
+                    className={`rounded-md py-[6px] px-4 text-white cursor-pointer 
+                      ${loading || !newFilterValue 
+                        ? 'bg-zinc-400 cursor-not-allowed' 
+                        : 'bg-zinc-800'}`}
                   >
-                    Add
+                    {loadingType === 'newFilter' ? 'Adding...' : 'Add'}
                   </button>
                 </div>
               </div>
@@ -154,30 +163,35 @@ export default function FiltersDialog({
             </DialogTitle>
 
             <div className="flex flex-col gap-8">
-              {existingFilters.map((ft, i) => (
-                <>
-                  <div key={i} className="flex flex-col gap-4 ">
+              {existingFilters.map((ft, i) => {
+                // Watch the input for each filter
+                const filterValue = watch(ft.name);
+                
+                return (
+                  <div key={i} className="flex flex-col gap-4">
                     <div className="grid grid-cols-4 gap-4 items-center">
                       <div className="font-semibold text-lg">{ft.name}</div>
                       <div className="flex border text-black border-zinc-600 rounded-md gap-2">
                         <input
                           {...register(ft.name)}
-                          placeholder="Add new investing field"
+                          placeholder={`Add ${ft.name}`}
                           type="text"
                           className="px-2 py-[6px] focus:outline-none"
                         />
                         <button
-                          disabled={loading && loadingType === ft.name}
+                          disabled={loading || !filterValue || ft.value.includes(filterValue)}
                           onClick={() =>
                             handleAddFilter({
                               ft,
-                              setLoadingType: ft.name,
                               item: getValues(ft.name),
                             })
                           }
-                          className="bg-zinc-800 rounded-md py-[6px] px-4 text-white cursor-pointer"
+                          className={`rounded-md py-[6px] px-4 text-white cursor-pointer 
+                            ${(loading || !filterValue || ft.value.includes(filterValue)) 
+                              ? 'bg-zinc-400 cursor-not-allowed' 
+                              : 'bg-zinc-800'}`}
                         >
-                          Add
+                          {loadingType === ft.name ? 'Adding...' : 'Add'}
                         </button>
                       </div>
                     </div>
@@ -202,8 +216,8 @@ export default function FiltersDialog({
                       </div>
                     </div>
                   </div>
-                </>
-              ))}
+                );
+              })}
             </div>
 
             <div className="w-full grid grid-cols-2 gap-6 mt-8">

@@ -73,7 +73,7 @@ const MultiSelectDropdown = ({options, formData, name}) => {
 
       {/* Dropdown Options */}
       {isOpen && (
-        <div className="absolute top-full mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+        <div className="absolute top-full z-50 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
           {options?.map((option) => (
             <div
               key={option}

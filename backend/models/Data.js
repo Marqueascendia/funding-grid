@@ -12,6 +12,16 @@ const companySchema = new mongoose.Schema({
   linkedIn: { type: String },
   title: { type: String },
   website: { type: String },
+  country: { type: [String] },
+  investorName: { type: String },
+  investorType: { type: [String] },
+  investmentStage: { type: [String] },
+  industryFocus: { type: [String] },
+  investmentSize: { type: [String] },
+  geographicFocus: { type: [String] },
+  investmentCriteria: { type: [String] },
+  exitStrategy: { type: [String] },
+  industrySubcategory: { type: [String] },
 });
 
 const Company = mongoose.model("Company", companySchema);
