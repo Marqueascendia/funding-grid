@@ -115,7 +115,7 @@ export default function FiltersDialog({
             className="relative transform overflow-hidden p-8 rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-5xl data-closed:sm:translate-y-0 data-closed:sm:scale-95"
           >
             <DialogTitle className="flex justify-between gap-5 mb-5">
-              <div className="flex gap-4 gap-4">
+              <div className="flex gap-4">
                 <div className="font-bold text-2xl">Filters</div>
                 <div className="flex border text-black border-zinc-600 rounded-md gap-2">
                   <input

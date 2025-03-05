@@ -16,6 +16,7 @@ const Table = ({
   setData,
   setTotalCount,
   existingFilters,
+  handlePageBtn
 }) => {
   const [entryOpen, setEntryOpen] = useState(false);
   const [formData, setFormData] = useState({});
@@ -187,6 +188,7 @@ const Table = ({
             setCurrentPage={setCurrentPage}
             fetchPage={fetchPage}
             totalCount={totalCount}
+            handlePageBtn={handlePageBtn}
           />
         </div>
       ) : (

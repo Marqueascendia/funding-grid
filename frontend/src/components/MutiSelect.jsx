@@ -49,7 +49,7 @@ const MultiSelectDropdown = ({options, formData, name}) => {
         onClick={() => setIsOpen(!isOpen)}
       >
         {selectedOptions.length === 0 ? (
-          <span className="text-gray-400">Select options...</span>
+          <span className="text-gray-400">Select {name}...</span>
         ) : (
           selectedOptions?.map((option) => (
             <div

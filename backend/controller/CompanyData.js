@@ -124,7 +124,7 @@ const getCompanyData = async (req, res) => {
     const data = await Company.find(filters)
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 , _id: 1});
 
     res.status(200).json({ data, totalCount });
   } catch (error) {

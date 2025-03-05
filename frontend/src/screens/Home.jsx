@@ -18,7 +18,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
-  const limit = 20;
+  const limit = 3;
   const [currentPage, setCurrentPage] = useState(1);
   const token = localStorage.getItem("fundingGridToken");
   const baseUrl = import.meta.env.VITE_BACKEND_URL;
@@ -83,7 +83,6 @@ const Home = () => {
   }
 
   async function handleAddEntry(setFormData, formData) {
-    console.log('FormData', formData);
     setIsAdding(true);
     try {
       const res = await axios.post(`${baseUrl}/api/single-upload`, formData, {
@@ -125,6 +124,11 @@ const Home = () => {
 
   function handleFilter() {
     fetchPage({ page: currentPage, searchTerm: searchTerm, filters });
+  }
+
+  function handlePageBtn(page) {
+    setCurrentPage(page);
+    fetchPage({ page: page, searchTerm: searchTerm, filters });
   }
 
   useEffect(() => {
@@ -212,6 +216,7 @@ const Home = () => {
           setCurrentPage={setCurrentPage}
           setTotalCount={setTotalCount}
           existingFilters={existingFilters}
+          handlePageBtn={handlePageBtn}
         />
       </div>
     </div>
