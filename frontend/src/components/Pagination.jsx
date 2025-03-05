@@ -4,17 +4,13 @@ function Pagination({
   currentPage,
   setCurrentPage,
   fetchPage,
-  totalCount
+  totalCount,
+  handlePageBtn
 }) {
   const maxVisiblePages = 5;
   const [displayCount, setDisplayCount] = useState(20);
   const [totalPages, setTotalPages] = useState(0);
   const [startPage, setStartPage] = useState(1);
-
-  const handlePageBtn = (page) => {
-    setCurrentPage(page);
-    fetchPage();
-  };
 
   const handlePrevRange = () => {
     if (startPage > 1) {
