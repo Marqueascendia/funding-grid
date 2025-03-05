@@ -16,7 +16,7 @@ const Table = ({
   setData,
   setTotalCount,
   existingFilters,
-  handlePageBtn
+  handlePageBtn,
 }) => {
   const [entryOpen, setEntryOpen] = useState(false);
   const [formData, setFormData] = useState({});
@@ -73,22 +73,21 @@ const Table = ({
   }, [currentPage]);
 
   useEffect(() => {
-    console.log(data)
+    console.log(data);
     const updateSpace = () => {
       const website = document.getElementById("website");
       if (website) {
         setSpace(website.getBoundingClientRect().left);
       }
     };
-  
+
     // Run after component renders
     setTimeout(updateSpace, 0);
-  
+
     // Optional: Update on window resize
     window.addEventListener("resize", updateSpace);
     return () => window.removeEventListener("resize", updateSpace);
   }, [data]);
-  
 
   return (
     <>
@@ -105,8 +104,16 @@ const Table = ({
                   S.No
                 </div>
                 <tr className="grid grid-cols-12 text-left w-[calc(100%-50px)]">
-                  <th className="sticky left-[50px] bg-white row">Company Name</th>
-                  <th style={{ left: `${space-68}px` }} id="website" className="sticky bg-white row">website</th>
+                  <th className="sticky left-[50px] bg-white row">
+                    Company Name
+                  </th>
+                  <th
+                    style={{ left: `${space - 68}px` }}
+                    id="website"
+                    className="sticky bg-white row"
+                  >
+                    website
+                  </th>
                   <th className="row">Form Submission</th>
                   <th className="row">Industry</th>
                   <th className="row">Investing Fields</th>
@@ -129,28 +136,41 @@ const Table = ({
                       key={index}
                       className=" grid grid-cols-12 items-center w-[calc(100%-50px)]"
                     >
-                      <td className="row sticky left-[50px] bg-white ">{row.companyName}</td>
-                      <td style={{ left: `${space-68}px` }} className="row sticky bg-white ">{row.website}</td>
+                      <td className="row sticky left-[50px] bg-white ">
+                        {row.companyName}
+                      </td>
                       <td
-                        onClick={() =>
-                          window.open(row.formSubmission, "_blank")
-                        }
+                        style={{ left: `${space - 68}px` }}
+                        className="row sticky bg-white "
+                      >
+                        {row.website}
+                      </td>
+                      <td
+                        onClick={() => {
+                          if (row.formSubmission.length > 0) {
+                            window.open(row.formSubmission, "_blank");
+                          }
+                        }}
                         className="cursor-pointer row underline"
                       >
-                        {row.formSubmission}
+                        {row.formSubmission ? row.formSubmission : "N/A"}
                       </td>
-                      <td className="row">{row?.industry.map((item, index)=>(
+                      <td className="row">
+                        {row?.industry.map((item, index) => (
                           <div key={index}>
                             {item}
                             {index < row?.industry.length - 1 && ", "}
                           </div>
-                      ))}</td>
-                      <td className="row">{row.investingFields.map((item, index)=>(
+                        ))}
+                      </td>
+                      <td className="row">
+                        {row.investingFields.map((item, index) => (
                           <div key={index}>
                             {item}
                             {index < row?.investingFields.length - 1 && ", "}
                           </div>
-                      ))}</td>
+                        ))}
+                      </td>
                       <td className="row flex gap-4">
                         <button
                           onClick={() => {
