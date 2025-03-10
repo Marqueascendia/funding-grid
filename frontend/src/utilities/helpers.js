@@ -4,6 +4,7 @@ export const uploadFormatDownload = async () => {
       companyName: "Tech Innovations Ltd",
       website: "https://techinnovations.com",
       industry: ["Technology", "AI", "Fintech"],
+      formSubmission: "2025-03-05",
       investingFields: ["Blockchain", "Cybersecurity"],
       firstName: "John",
       lastName: "Doe",
@@ -27,6 +28,7 @@ export const uploadFormatDownload = async () => {
   const headers = [
     "Company Name",
     "Website",
+    "Form Submission",
     "Industry",
     "Investing Fields",
     "First Name",
@@ -51,6 +53,7 @@ export const uploadFormatDownload = async () => {
     [
       row.companyName,
       row.website,
+      row.formSubmission,
       row.industry,
       row.investingFields,
       row.firstName,

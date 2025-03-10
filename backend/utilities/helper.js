@@ -8,7 +8,7 @@ const convertToCamelCase = (data) => {
   return {
     companyName: getString("Company Name"),
     website: getString("Website"),
-    formSubmission: getString("Form submission"),
+    formSubmission: getString("Form Submission"),
     industry: getArray("Industry"),
     investingFields: getArray("Investing Fields"),
     firstName: getString("First Name"),
