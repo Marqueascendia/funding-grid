@@ -158,7 +158,7 @@ const Table = ({
           <Loader className="animate-spin" />
         </div>
       ) : data.length > 0 ? (
-        <div className="w-full justify-between flex flex-col gap-6 mb-12">
+        <div className="w-full justify-between flex flex-col gap-6 mb-[60px] relative">
           <button
             onClick={() => setDeleteMultipleOpen(true)}
             className="mb-2 px-4 py-2 bg-red-500 text-white rounded-md w-fit"
