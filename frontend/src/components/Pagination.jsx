@@ -34,7 +34,7 @@ function Pagination({
 
   return (
     <>
-      <div className="pagination flex items-center justify-between bg-[#ffffff] py-2 px-[52px] w-screen fixed bottom-0 z-10">
+      <div className="pagination flex items-center justify-between bg-[#ffffff] py-2 px-[52px] w-screen fixed left-0 bottom-0 z-10">
         <div className="text-sm text-gray-800 font-semibold px-5">
           Total Entries: {totalCount}
         </div>

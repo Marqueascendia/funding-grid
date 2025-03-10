@@ -1,10 +1,9 @@
 const Filters = require("../models/filters");
 
-
 const getFilters = async (req, res) => {
   try {
     const filters = await Filters.find();
-    res.status(200).json({ filters : filters });
+    res.status(200).json({ filters: filters });
   } catch (error) {
     console.error("error in get filters", error.message);
     res.status(500).json({ error: error.message });
@@ -14,9 +13,9 @@ const getFilters = async (req, res) => {
 const updateFilters = async (req, res) => {
   try {
     const { value, _id } = req.body;
-    console.log('req.body', req.body);
+    console.log("req.body", req.body);
 
-    if(!_id || !value) {
+    if (!_id || !value) {
       return res.status(400).json({ error: "ID and value are required" });
     }
 
@@ -30,7 +29,7 @@ const updateFilters = async (req, res) => {
 
     const updatedFilters = await filter.save();
 
-    res.status(200).json({filters: updatedFilters});
+    res.status(200).json({ filters: updatedFilters });
   } catch (error) {
     console.error("Error in update filters:", error.message);
     res.status(500).json({ error: error.message });
