@@ -5,7 +5,7 @@ function Pagination({
   setCurrentPage,
   fetchPage,
   totalCount,
-  handlePageBtn
+  handlePageBtn,
 }) {
   const maxVisiblePages = 5;
   const [displayCount, setDisplayCount] = useState(20);
@@ -34,7 +34,10 @@ function Pagination({
 
   return (
     <>
-      <div className="pagination flex items-center justify-between bg-[#ffffff] py-2 px-[52px] w-screen fixed bottom-0 z-10">
+      <div
+        style={{ boxShadow: "0px -5px 10px rgba(0, 0, 0, 0.05)" }}
+        className="pagination flex items-center justify-between bg-[#ffffff] py-2 px-[52px] w-full fixed left-0 bottom-0 z-10"
+      >
         <div className="text-sm text-gray-800 font-semibold px-5">
           Total Entries: {totalCount}
         </div>
@@ -66,7 +69,9 @@ function Pagination({
                   key={index}
                   onClick={() => handlePageBtn(startPage + index)}
                   className={` text-sm md:text-base rounded-md md:rounded-xl w-8 md:w-10 h-8 md:h-10 ${
-                    currentPage === startPage + index ? "bg-zinc-400 text-white font-semibold" : ""
+                    currentPage === startPage + index
+                      ? "bg-zinc-400 text-white font-semibold"
+                      : ""
                   }`}
                 >
                   {startPage + index}
